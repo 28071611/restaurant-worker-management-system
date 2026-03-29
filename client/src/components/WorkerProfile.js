@@ -17,7 +17,8 @@ import {
   ArrowLeft,
   ChevronRight,
   Shield,
-  Activity
+  Activity,
+  Edit
 } from 'lucide-react';
 
 const WorkerProfile = () => {

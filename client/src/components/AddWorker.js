@@ -14,7 +14,8 @@ import {
   Mail,
   Award,
   Shield,
-  PlusCircle
+  PlusCircle,
+  AlertCircle
 } from 'lucide-react';
 
 const AddWorker = () => {

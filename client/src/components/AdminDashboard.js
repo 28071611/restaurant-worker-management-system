@@ -18,7 +18,9 @@ import {
   Award,
   AlertCircle,
   MessageSquare,
-  Plus
+  Plus,
+  Phone,
+  Clock
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -249,8 +251,8 @@ const AdminDashboard = () => {
                       </td>
                       <td>
                         <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${worker.status === 'Active'
-                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                           }`}>
                           {worker.status}
                         </span>
