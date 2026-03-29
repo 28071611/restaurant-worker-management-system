@@ -13,7 +13,8 @@ import {
   User,
   LayoutDashboard,
   MessageSquare,
-  ClipboardList
+  ClipboardList,
+  Trophy
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -77,8 +78,8 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${isActive
-                      ? 'bg-amber-50 text-amber-700 shadow-sm scale-105'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-amber-600'
+                    ? 'bg-amber-50 text-amber-700 shadow-sm scale-105'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-amber-600'
                     }`}
                 >
                   <Icon className="h-4 w-4" />

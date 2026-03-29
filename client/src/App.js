@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import WorkerList from './components/WorkerList';
@@ -11,8 +11,19 @@ import ReputationDashboard from './components/ReputationDashboard';
 import WorkerProfile from './components/WorkerProfile';
 import Login from './components/Login';
 import Register from './components/Register';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
+import CustomerDashboard from './components/CustomerDashboard';
+import ComplaintForm from './components/ComplaintForm';
+import DatasetSeeder from './components/DatasetSeeder';
+import KeyboardShortcuts from './components/KeyboardShortcuts';
+import ProtectedRoute from './components/ProtectedRoute';
+import Unauthorized from './components/Unauthorized';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { WorkerProvider } from './context/WorkerContext';
 import WorkerPortal from './components/WorkerPortal';
 import Reviews from './components/Reviews';
+import './App.css';
 
 // Home Redirect Component
 const HomeRedirect = () => {

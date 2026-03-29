@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, Lock, PlusCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, error } = useAuth();
+  const { login, loading, error } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',

@@ -5,7 +5,7 @@ const { User } = require('../models/User');
 const authenticate = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-    
+
     // Find user
     const user = await User.findById(decoded.id).select('-password');
     if (!user || !user.isActive) {
@@ -68,6 +68,7 @@ const adminOrCustomer = authorize('admin', 'customer');
 
 module.exports = {
   authenticate,
+  protect: authenticate, // Alias for consistency
   authorize,
   adminOnly,
   customerOnly,
