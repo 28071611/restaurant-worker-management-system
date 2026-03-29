@@ -1,4 +1,5 @@
 const { Worker, WorkerFactory } = require('../models/Worker');
+const { User, UserFactory } = require('../models/User');
 
 // Iterator Pattern - Worker Iterator
 class WorkerIterator {
@@ -25,15 +26,28 @@ exports.addWorker = async (req, res) => {
   try {
     const worker = WorkerFactory.createWorker(req.body);
     await worker.save();
-    res.status(201).json({ 
-      success: true, 
+
+    // Also create a User record for login
+    if (worker.email) {
+      const user = UserFactory.createUser({
+        name: worker.name,
+        email: worker.email,
+        password: req.body.password || 'Worker@123',
+        role: 'worker',
+        phone: worker.phone
+      });
+      await user.save();
+    }
+
+    res.status(201).json({
+      success: true,
       message: 'Worker added successfully',
-      data: worker 
+      data: worker
     });
   } catch (error) {
-    res.status(400).json({ 
-      success: false, 
-      message: error.message 
+    res.status(400).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -42,7 +56,7 @@ exports.addWorker = async (req, res) => {
 exports.addWorkerWithImage = async (req, res) => {
   try {
     const { name, email, phone, role, salary, shift, department, experience } = req.body;
-    
+
     // Validate required fields
     if (!name || !phone || !role || !salary || !shift) {
       return res.status(400).json({
@@ -52,10 +66,10 @@ exports.addWorkerWithImage = async (req, res) => {
     }
 
     // Check if worker already exists
-    const existingWorker = await Worker.findOne({ 
-      $or: [{ email }, { phone }] 
+    const existingWorker = await Worker.findOne({
+      $or: [{ email }, { phone }]
     });
-    
+
     if (existingWorker) {
       return res.status(400).json({
         success: false,
@@ -114,6 +128,18 @@ exports.addWorkerWithImage = async (req, res) => {
 
     await worker.save();
 
+    // Also create a User record for login
+    if (worker.email) {
+      const user = UserFactory.createUser({
+        name: worker.name,
+        email: worker.email,
+        password: req.body.password || 'Worker@123',
+        role: 'worker',
+        phone: worker.phone
+      });
+      await user.save();
+    }
+
     res.status(201).json({
       success: true,
       message: 'Worker added successfully with image',
@@ -131,7 +157,7 @@ exports.addWorkerWithImage = async (req, res) => {
 exports.updateWorkerImage = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -197,6 +223,118 @@ exports.removeWorkerImage = async (req, res) => {
   }
 };
 
+// Get Worker by ID
+exports.getWorkerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const worker = await Worker.findById(id);
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update Worker
+exports.updateWorker = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const worker = await Worker.findByIdAndUpdate(id, req.body, { new: true });
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Worker updated successfully',
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Delete Worker
+exports.deleteWorker = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const worker = await Worker.findByIdAndDelete(id);
+
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Worker deleted successfully',
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get Worker Statistics
+exports.getWorkerStats = async (req, res) => {
+  try {
+    const workers = await Worker.find();
+
+    // Calculate statistics
+    const totalWorkers = workers.length;
+    const totalSalary = workers.reduce((sum, worker) => sum + worker.salary, 0);
+    const averageSalary = totalSalary / totalWorkers;
+
+    // Group by department
+    const byDepartment = workers.reduce((acc, worker) => {
+      acc[worker.department] = (acc[worker.department] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Group by role
+    const byRole = workers.reduce((acc, worker) => {
+      acc[worker.role] = (acc[worker.role] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Group by shift
+    const byShift = workers.reduce((acc, worker) => {
+      acc[worker.shift] = (acc[worker.shift] || 0) + 1;
+      return acc;
+    }, {});
+
+    res.json({
+      success: true,
+      data: {
+        totalWorkers,
+        totalSalary,
+        averageSalary,
+        byDepartment,
+        byRole,
+        byShift
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // Helper function to get default department based on role
 function getDefaultDepartment(role) {
   const departmentMap = {
@@ -214,10 +352,10 @@ function getDefaultDepartment(role) {
 exports.getWorkers = async (req, res) => {
   try {
     const workers = await Worker.find();
-    
+
     // Set Concept - Get Unique Roles
     const uniqueRoles = new Set(workers.map(w => w.role));
-    
+
     // Map Concept - Group Workers by Role
     const workersByRole = workers.reduce((map, worker) => {
       if (!map[worker.role]) {
@@ -229,7 +367,7 @@ exports.getWorkers = async (req, res) => {
 
     // Iterator Pattern
     const iterator = new WorkerIterator(workers);
-    
+
     res.json({
       success: true,
       data: workers,
@@ -251,7 +389,7 @@ exports.getWorkers = async (req, res) => {
 exports.searchWorkers = async (req, res) => {
   try {
     const { query } = req.query;
-    
+
     // Lambda/Arrow Function (Filter)
     const workers = await Worker.find({
       $or: [
@@ -274,10 +412,10 @@ exports.searchWorkers = async (req, res) => {
 exports.filterWorkers = async (req, res) => {
   try {
     const { role } = req.params;
-    
+
     // Lambda/Arrow Function
     const workers = await Worker.find({ role });
-    
+
     res.json({
       success: true,
       data: workers,
@@ -292,14 +430,14 @@ exports.filterWorkers = async (req, res) => {
 exports.sortWorkers = async (req, res) => {
   try {
     const { sortBy = 'salary', order = 'desc' } = req.query;
-    
+
     let workers = await Worker.find();
-    
+
     // Comparator Implementation
     workers.sort((a, b) => {
       let comparison = 0;
-      
-      switch(sortBy) {
+
+      switch (sortBy) {
         case 'salary':
           comparison = a.salary - b.salary;
           break;
@@ -312,7 +450,7 @@ exports.sortWorkers = async (req, res) => {
         default:
           comparison = a.salary - b.salary;
       }
-      
+
       return order === 'asc' ? comparison : -comparison;
     });
 
@@ -327,47 +465,18 @@ exports.sortWorkers = async (req, res) => {
   }
 };
 
-// Update Worker
-exports.updateWorker = async (req, res) => {
+// Get current logged in worker progress
+exports.getWorkerMe = async (req, res) => {
   try {
-    const worker = await Worker.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true, runValidators: true }
-    );
-    
+    const worker = await Worker.findOne({ email: req.user.email });
     if (!worker) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Worker not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Worker profile not found'
       });
     }
-
     res.json({
       success: true,
-      message: 'Worker updated successfully',
-      data: worker
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-// Delete Worker
-exports.deleteWorker = async (req, res) => {
-  try {
-    const worker = await Worker.findByIdAndDelete(req.params.id);
-    
-    if (!worker) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Worker not found' 
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Worker deleted successfully',
       data: worker
     });
   } catch (error) {

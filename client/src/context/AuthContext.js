@@ -50,18 +50,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await axios.post('/api/auth/login', {
         email,
         password
       });
 
       const { user: userData, token: userToken } = response.data.data;
-      
+
       setUser(userData);
       setToken(userToken);
       localStorage.setItem('token', userToken);
-      
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
@@ -77,15 +77,15 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await axios.post('/api/auth/register', userData);
-      
+
       const { user: newUser, token: userToken } = response.data.data;
-      
+
       setUser(newUser);
       setToken(userToken);
       localStorage.setItem('token', userToken);
-      
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
@@ -109,11 +109,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const response = await axios.put('/api/auth/profile', profileData);
-      
+
       setUser(response.data.data);
-      
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
@@ -129,12 +129,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       await axios.put('/api/auth/change-password', {
         currentPassword,
         newPassword
       });
-      
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Password change failed';
@@ -151,6 +151,9 @@ export const AuthProvider = ({ children }) => {
   // Check if user is customer
   const isCustomer = user?.role === 'customer';
 
+  // Check if user is worker
+  const isWorker = user?.role === 'worker';
+
   // Check if user is authenticated
   const isAuthenticated = !!user;
 
@@ -162,6 +165,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isCustomer,
+    isWorker,
     login,
     register,
     logout,

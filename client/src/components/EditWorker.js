@@ -13,7 +13,8 @@ const EditWorker = () => {
     salary: '',
     shift: 'Morning',
     phone: '',
-    status: 'Active'
+    status: 'Active',
+    department: 'Kitchen'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,6 +22,7 @@ const EditWorker = () => {
   const roles = ['Chef', 'Waiter', 'Cleaner', 'Manager', 'Cashier'];
   const shifts = ['Morning', 'Evening', 'Night'];
   const statuses = ['Active', 'On Leave', 'Inactive'];
+  const departments = ['Kitchen', 'Service', 'Maintenance', 'Management', 'Billing', 'Security'];
 
   useEffect(() => {
     const worker = workers.find(w => w._id === id);
@@ -31,7 +33,8 @@ const EditWorker = () => {
         salary: worker.salary.toString(),
         shift: worker.shift,
         phone: worker.phone,
-        status: worker.status
+        status: worker.status,
+        department: worker.department || 'Kitchen'
       });
     } else {
       navigate('/workers');
@@ -72,7 +75,7 @@ const EditWorker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -205,6 +208,20 @@ const EditWorker = () => {
               >
                 {statuses.map(status => (
                   <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </FormField>
+
+            <FormField label="Department" icon={Briefcase}>
+              <select
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="input-field"
+                required
+              >
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
                 ))}
               </select>
             </FormField>

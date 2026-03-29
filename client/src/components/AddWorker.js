@@ -26,6 +26,7 @@ const AddWorker = () => {
   const roles = ['Chef', 'Waiter', 'Cleaner', 'Manager', 'Cashier'];
   const shifts = ['Morning', 'Evening', 'Night'];
   const statuses = ['Active', 'On Leave', 'Inactive'];
+  const departments = ['Kitchen', 'Service', 'Maintenance', 'Management', 'Billing', 'Security'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +62,7 @@ const AddWorker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -70,14 +71,14 @@ const AddWorker = () => {
 
     try {
       const formDataToSend = new FormData();
-      
+
       // Add form fields
       Object.keys(formData).forEach(key => {
         if (formData[key]) {
           formDataToSend.append(key, formData[key]);
         }
       });
-      
+
       // Add image if selected
       if (selectedImage) {
         formDataToSend.append('employeeImage', selectedImage);
@@ -103,7 +104,7 @@ const AddWorker = () => {
           experience: ''
         });
         setSelectedImage(null);
-        
+
         setTimeout(() => {
           navigate('/workers');
         }, 2000);

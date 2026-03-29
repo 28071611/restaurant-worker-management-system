@@ -12,14 +12,19 @@ const {
   getWorkerStats,
   addWorkerWithImage,
   updateWorkerImage,
-  removeWorkerImage
+  removeWorkerImage,
+  getWorkerMe
 } = require('../controllers/workerController');
 const { uploadEmployeeImage } = require('../middleware/upload');
+const { protect } = require('../middleware/auth');
+
+// Worker specific routes
+router.get('/me', protect, getWorkerMe);
 
 // Public routes
 router.get('/', getWorkers);
 router.get('/search', searchWorkers);
-router.get('/filter', filterWorkers);
+router.get('/role/:role', filterWorkers);
 router.get('/sort', sortWorkers);
 router.get('/stats', getWorkerStats);
 router.get('/:id', getWorkerById);

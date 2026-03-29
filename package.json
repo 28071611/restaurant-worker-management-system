@@ -8,6 +8,7 @@
     "server": "nodemon server/index.js",
     "client": "cd client && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "seed": "node MONGODB_SEED_SCRIPT_FIXED.js",
     "install-all": "npm install && cd client && npm install"
   },
   "keywords": [

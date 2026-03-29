@@ -21,12 +21,13 @@ class DatabaseConnection {
   }
 
   connect() {
-    mongoose.connect(process.env.MONGO_URI, {
+    const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/restaurant_management';
+    mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
-    .then(() => console.log('✅ MongoDB Connected'))
-    .catch((err) => console.error('❌ MongoDB Connection Error:', err));
+      .then(() => console.log('✅ MongoDB Connected'))
+      .catch((err) => console.error('❌ MongoDB Connection Error:', err));
   }
 }
 
@@ -48,6 +49,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reputation', reputationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -57,3 +59,5 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+module.exports = app;

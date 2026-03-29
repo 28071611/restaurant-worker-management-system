@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'customer'],
+    enum: ['admin', 'customer', 'worker'],
     default: 'customer'
   },
   phone: {
@@ -48,9 +48,9 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -61,12 +61,12 @@ userSchema.pre('save', async function(next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 // Update login info
-userSchema.methods.updateLoginInfo = function() {
+userSchema.methods.updateLoginInfo = function () {
   this.lastLogin = new Date();
   this.loginCount += 1;
   return this.save();
@@ -78,14 +78,14 @@ class UserFactory {
     const user = new User(userData);
     return user;
   }
-  
+
   static createAdmin(userData) {
     return new User({
       ...userData,
       role: 'admin'
     });
   }
-  
+
   static createCustomer(userData) {
     return new User({
       ...userData,

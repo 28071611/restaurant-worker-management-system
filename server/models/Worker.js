@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const workerSchema = new mongoose.Schema({
   name: {
@@ -69,6 +70,11 @@ const workerSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
+  },
+  password: {
+    type: String,
+    required: false, // Optional if we use User model, but let's add it for direct login
+    minlength: 6
   }
 }, {
   timestamps: true
@@ -81,7 +87,7 @@ workerSchema.index({ role: 1 });
 workerSchema.index({ department: 1 });
 
 // Virtual for image URL
-workerSchema.virtual('imageUrl').get(function() {
+workerSchema.virtual('imageUrl').get(function () {
   if (this.employeeImage && this.employeeImage.filename) {
     return `/uploads/${this.employeeImage.filename}`;
   }
@@ -94,7 +100,7 @@ class WorkerFactory {
     const worker = new Worker(workerData);
     return worker;
   }
-  
+
   static createChef(workerData) {
     return new Worker({
       ...workerData,
@@ -102,7 +108,7 @@ class WorkerFactory {
       department: 'Kitchen'
     });
   }
-  
+
   static createWaiter(workerData) {
     return new Worker({
       ...workerData,
@@ -110,7 +116,7 @@ class WorkerFactory {
       department: 'Service'
     });
   }
-  
+
   static createCleaner(workerData) {
     return new Worker({
       ...workerData,
@@ -118,7 +124,7 @@ class WorkerFactory {
       department: 'Maintenance'
     });
   }
-  
+
   static createManager(workerData) {
     return new Worker({
       ...workerData,
@@ -126,7 +132,7 @@ class WorkerFactory {
       department: 'Management'
     });
   }
-  
+
   static createCashier(workerData) {
     return new Worker({
       ...workerData,
@@ -134,7 +140,7 @@ class WorkerFactory {
       department: 'Billing'
     });
   }
-  
+
   static createSecurity(workerData) {
     return new Worker({
       ...workerData,
@@ -144,26 +150,32 @@ class WorkerFactory {
   }
 }
 
-// Pre-save middleware for validation
-workerSchema.pre('save', function(next) {
-  // Validate phone number is exactly 10 digits
+// Hash password before saving
+workerSchema.pre('save', async function (next) {
+  // Regular validation
   if (this.phone && !/^[0-9]{10}$/.test(this.phone)) {
-    next(new Error('Phone number must be exactly 10 digits'));
+    return next(new Error('Phone number must be exactly 10 digits'));
   }
-  
-  // Validate name contains only letters and spaces
   if (this.name && !/^[A-Za-z ]{3,}$/.test(this.name)) {
-    next(new Error('Name must contain only letters and spaces, minimum 3 characters'));
+    return next(new Error('Name must contain only letters and spaces, minimum 3 characters'));
   }
-  
-  next();
+
+  // Password hashing
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Method to update employee image
-workerSchema.methods.updateEmployeeImage = function(imageData) {
+workerSchema.methods.updateEmployeeImage = function (imageData) {
   this.employeeImage = {
     filename: imageData.filename,
-    originalName: imageData.originalname,
+    originalName: imageData.originalName,
     path: imageData.path,
     size: imageData.size,
     mimetype: imageData.mimetype,
@@ -173,10 +185,10 @@ workerSchema.methods.updateEmployeeImage = function(imageData) {
 };
 
 // Method to remove employee image
-workerSchema.methods.removeEmployeeImage = function() {
+workerSchema.methods.removeEmployeeImage = function () {
   const fs = require('fs');
   const path = require('path');
-  
+
   if (this.employeeImage && this.employeeImage.path) {
     // Delete file from filesystem
     try {
@@ -187,10 +199,16 @@ workerSchema.methods.removeEmployeeImage = function() {
       console.error('Error deleting image file:', error);
     }
   }
-  
+
   // Remove image reference from database
   this.employeeImage = undefined;
   return this.save();
+};
+
+// Compare password method
+workerSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 const Worker = mongoose.model('Worker', workerSchema);
