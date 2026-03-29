@@ -102,10 +102,26 @@ const WorkerList = () => {
     <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-4">
-          <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
-            <span className="text-lg font-medium text-primary-700">
-              {worker.name.charAt(0).toUpperCase()}
-            </span>
+          {/* Employee Image or Avatar */}
+          <div className="relative">
+            {worker.employeeImage && worker.employeeImage.filename ? (
+              <img
+                src={`/uploads/${worker.employeeImage.filename}`}
+                alt={worker.name}
+                className="h-12 w-12 rounded-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div className={`h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center ${
+              worker.employeeImage && worker.employeeImage.filename ? 'hidden' : ''
+            }`}>
+              <span className="text-lg font-medium text-primary-700">
+                {worker.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{worker.name}</h3>

@@ -150,15 +150,32 @@ const WorkerProfile = () => {
       {/* Worker Info Card */}
       <div className="card">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="h-20 w-20 bg-primary-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-700">
-                {worker.name.charAt(0).toUpperCase()}
-              </span>
+          <div className="flex items-center space-x-6 mb-6">
+            {/* Employee Image or Avatar */}
+            <div className="relative">
+              {worker.employeeImage && worker.employeeImage.filename ? (
+                <img
+                  src={`/uploads/${worker.employeeImage.filename}`}
+                  alt={worker.name}
+                  className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className={`h-24 w-24 bg-primary-100 rounded-full flex items-center justify-center border-4 border-white shadow-lg ${
+                worker.employeeImage && worker.employeeImage.filename ? 'hidden' : ''
+              }`}>
+                <span className="text-3xl font-bold text-primary-700">
+                  {worker.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{worker.name}</h2>
-              <p className="text-lg text-gray-600">{worker.role}</p>
+            
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">{worker.name}</h1>
+              <p className="text-lg text-gray-600 mt-1">{worker.role}</p>
               <div className="flex items-center space-x-4 mt-2">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   worker.status === 'Active' 
@@ -167,8 +184,8 @@ const WorkerProfile = () => {
                 }`}>
                   {worker.status}
                 </span>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                  {worker.shift}
+                <span className="text-sm text-gray-500">
+                  Joined {new Date(worker.joinDate).toLocaleDateString()}
                 </span>
               </div>
             </div>

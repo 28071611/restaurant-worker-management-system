@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { WorkerContext } from '../context/WorkerContext';
 import { formatIndianRupees, formatAverageSalary, formatTotalPayroll } from '../utils/currencyUtils';
-import { Users, DollarSign, Clock, TrendingUp, UserPlus } from 'lucide-react';
+import { Users, DollarSign, Clock, TrendingUp, UserPlus, ChefHat } from 'lucide-react';
 
 const Dashboard = () => {
   const { workers, getUniqueRoles, getWorkersByRole, getAverageSalary } = React.useContext(WorkerContext);

@@ -38,6 +38,178 @@ exports.addWorker = async (req, res) => {
   }
 };
 
+// Add Worker with Image
+exports.addWorkerWithImage = async (req, res) => {
+  try {
+    const { name, email, phone, role, salary, shift, department, experience } = req.body;
+    
+    // Validate required fields
+    if (!name || !phone || !role || !salary || !shift) {
+      return res.status(400).json({
+        success: false,
+        message: 'Required fields are missing'
+      });
+    }
+
+    // Check if worker already exists
+    const existingWorker = await Worker.findOne({ 
+      $or: [{ email }, { phone }] 
+    });
+    
+    if (existingWorker) {
+      return res.status(400).json({
+        success: false,
+        message: 'Worker with this email or phone already exists'
+      });
+    }
+
+    // Create worker data
+    const workerData = {
+      name,
+      email,
+      phone,
+      role,
+      salary: Number(salary),
+      shift,
+      department: department || getDefaultDepartment(role),
+      experience: experience ? Number(experience) : 0
+    };
+
+    // Create worker using Factory Pattern
+    let worker;
+    switch (role) {
+      case 'Chef':
+        worker = WorkerFactory.createChef(workerData);
+        break;
+      case 'Waiter':
+        worker = WorkerFactory.createWaiter(workerData);
+        break;
+      case 'Cleaner':
+        worker = WorkerFactory.createCleaner(workerData);
+        break;
+      case 'Manager':
+        worker = WorkerFactory.createManager(workerData);
+        break;
+      case 'Cashier':
+        worker = WorkerFactory.createCashier(workerData);
+        break;
+      case 'Security':
+        worker = WorkerFactory.createSecurity(workerData);
+        break;
+      default:
+        worker = WorkerFactory.createWorker(workerData);
+    }
+
+    // Add image if uploaded
+    if (req.file) {
+      worker.employeeImage = {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        path: req.file.path,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        uploadedAt: new Date()
+      };
+    }
+
+    await worker.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Worker added successfully with image',
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Update Worker Image
+exports.updateWorkerImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided'
+      });
+    }
+
+    const worker = await Worker.findById(id);
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    // Update image
+    await worker.updateEmployeeImage({
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      path: req.file.path,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
+
+    res.json({
+      success: true,
+      message: 'Worker image updated successfully',
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Remove Worker Image
+exports.removeWorkerImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const worker = await Worker.findById(id);
+    if (!worker) {
+      return res.status(404).json({
+        success: false,
+        message: 'Worker not found'
+      });
+    }
+
+    await worker.removeEmployeeImage();
+
+    res.json({
+      success: true,
+      message: 'Worker image removed successfully',
+      data: worker
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Helper function to get default department based on role
+function getDefaultDepartment(role) {
+  const departmentMap = {
+    'Chef': 'Kitchen',
+    'Waiter': 'Service',
+    'Cleaner': 'Maintenance',
+    'Manager': 'Management',
+    'Cashier': 'Billing',
+    'Security': 'Security'
+  };
+  return departmentMap[role] || 'Service';
+}
+
 // Get All Workers with Collections Concepts
 exports.getWorkers = async (req, res) => {
   try {
