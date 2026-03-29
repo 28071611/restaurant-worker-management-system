@@ -86,7 +86,7 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/worker/:id" element={
-                  <ProtectedRoute requiredRole="customer">
+                  <ProtectedRoute requiredRole={['admin', 'customer', 'worker']}>
                     <WorkerProfile />
                   </ProtectedRoute>
                 } />

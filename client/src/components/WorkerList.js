@@ -2,32 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { WorkerContext } from '../context/WorkerContext';
 import { formatIndianRupees } from '../utils/currencyUtils';
-import { 
-  Search, 
-  Filter, 
-  ArrowUpDown, 
-  Edit, 
-  Trash2, 
-  Plus, 
+import {
+  Search,
+  Filter,
+  ArrowUpDown,
+  Edit,
+  Trash2,
+  Plus,
   User,
   DollarSign,
   Clock,
   Phone,
   Star,
-  Eye
+  Eye,
+  Briefcase,
+  Activity
 } from 'lucide-react';
 
 const WorkerList = () => {
-  const { 
-    workers, 
-    loading, 
-    deleteWorker, 
-    searchWorkers, 
-    filterWorkers, 
-    sortWorkers,
-    getUniqueRoles 
+  const navigate = useNavigate();
+  const {
+    workers,
+    loading,
+    deleteWorker,
+    getUniqueRoles
   } = React.useContext(WorkerContext);
-  
+
   const [filteredWorkers, setFilteredWorkers] = useState(workers);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('All');
@@ -36,59 +36,53 @@ const WorkerList = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
-    setFilteredWorkers(workers);
-  }, [workers]);
+    applyFilters();
+  }, [workers, searchQuery, selectedRole, sortBy, sortOrder]);
 
-  const handleSearch = async (query) => {
-    setSearchQuery(query);
-    if (query.trim() === '') {
-      setFilteredWorkers(workers);
-      return;
+  const applyFilters = () => {
+    let result = [...workers];
+
+    // Search filter
+    if (searchQuery.trim() !== '') {
+      result = result.filter(worker =>
+        worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.phone.includes(searchQuery)
+      );
     }
 
-    // Lambda/Arrow Function - Filter workers
-    const filtered = workers.filter(worker => 
-      worker.name.toLowerCase().includes(query.toLowerCase()) ||
-      worker.role.toLowerCase().includes(query.toLowerCase()) ||
-      worker.phone.includes(query)
-    );
-    setFilteredWorkers(filtered);
-  };
-
-  const handleFilter = (role) => {
-    setSelectedRole(role);
-    if (role === 'All') {
-      setFilteredWorkers(workers);
-    } else {
-      // Stream API - Filter by role
-      const filtered = workers.filter(worker => worker.role === role);
-      setFilteredWorkers(filtered);
+    // Role filter
+    if (selectedRole !== 'All') {
+      result = result.filter(worker => worker.role === selectedRole);
     }
-  };
 
-  const handleSort = (field) => {
-    setSortBy(field);
-    const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    setSortOrder(newOrder);
-
-    // Comparator Pattern - Sort workers
-    const sorted = [...filteredWorkers].sort((a, b) => {
-      let aVal = a[field];
-      let bVal = b[field];
+    // Sorting
+    result.sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
 
       if (typeof aVal === 'string') {
         aVal = aVal.toLowerCase();
         bVal = bVal.toLowerCase();
       }
 
-      if (newOrder === 'asc') {
+      if (sortOrder === 'asc') {
         return aVal > bVal ? 1 : -1;
       } else {
         return aVal < bVal ? 1 : -1;
       }
     });
 
-    setFilteredWorkers(sorted);
+    setFilteredWorkers(result);
+  };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
   };
 
   const handleDelete = async (id) => {
@@ -99,108 +93,93 @@ const WorkerList = () => {
   };
 
   const WorkerCard = ({ worker }) => (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-4">
-          {/* Employee Image or Avatar */}
-          <div className="relative">
-            {worker.employeeImage && worker.employeeImage.filename ? (
-              <img
-                src={`/uploads/${worker.employeeImage.filename}`}
-                alt={worker.name}
-                className="h-12 w-12 rounded-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div className={`h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center ${
-              worker.employeeImage && worker.employeeImage.filename ? 'hidden' : ''
-            }`}>
-              <span className="text-lg font-medium text-primary-700">
-                {worker.name.charAt(0).toUpperCase()}
-              </span>
+    <div className="glass-card p-6 flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden">
+      <div className={`absolute top-0 right-0 h-24 w-24 bg-gradient-to-br ${worker.status === 'Active' ? 'from-emerald-500/20' : 'from-amber-500/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-2xl`} />
+
+      <div>
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-emerald-500/50 transition-colors">
+                {worker.employeeImage?.filename ? (
+                  <img src={`/uploads/${worker.employeeImage.filename}`} className="h-full w-full object-cover" alt="" />
+                ) : (
+                  <span className="text-2xl font-black text-white/20 group-hover:text-emerald-500 transition-colors">{worker.name.charAt(0)}</span>
+                )}
+              </div>
+              <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-black ${worker.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white tracking-tight uppercase group-hover:text-emerald-400 transition-colors">{worker.name}</h3>
+              <p className="text-emerald-500 text-xs font-black uppercase tracking-widest leading-none mt-1">{worker.role}</p>
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{worker.name}</h3>
-            <p className="text-gray-600">{worker.role}</p>
-          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Link
-            to={`/worker/${worker._id}`}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title="View Profile"
-          >
-            <Eye className="h-4 w-4" />
-          </Link>
-          <Link
-            to={`/edit-worker/${worker._id}`}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title="Edit Worker"
-          >
-            <Edit className="h-4 w-4" />
-          </Link>
-          <Link
-            to={`/rate-worker/${worker._id}`}
-            className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-            title="Rate Worker"
-          >
-            <Star className="h-4 w-4" />
-          </Link>
-          <button
-            onClick={() => setDeleteConfirm(worker._id)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Delete Worker"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+
+        <div className="space-y-4 mb-8">
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <div className="flex items-center space-x-2">
+              <Phone className="h-4 w-4 text-emerald-500" />
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact</span>
+            </div>
+            <span className="text-sm font-mono text-white tracking-tighter">+91 {worker.phone}</span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4 text-emerald-500" />
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Payroll</span>
+            </div>
+            <span className="text-sm font-black text-emerald-400">{formatIndianRupees(worker.salary)}</span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-emerald-500" />
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Shift</span>
+            </div>
+            <span className="text-xs font-black text-white uppercase">{worker.shift}</span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <DollarSign className="h-4 w-4" />
-          <span>{formatIndianRupees(worker.salary)}</span>
-        </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <Clock className="h-4 w-4" />
-          <span>{worker.shift}</span>
-        </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <Phone className="h-4 w-4" />
-          <span>{worker.phone}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            worker.status === 'Active' 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-yellow-100 text-yellow-800'
-          }`}>
-            {worker.status}
-          </span>
-        </div>
+      <div className="flex items-center space-x-2 pt-4 border-t border-white/5">
+        <button
+          onClick={() => navigate(`/worker/${worker._id}`)}
+          className="flex-1 flex items-center justify-center space-x-2 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10"
+        >
+          <Eye className="h-4 w-4" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Intel</span>
+        </button>
+        <button
+          onClick={() => navigate(`/edit-worker/${worker._id}`)}
+          className="p-2.5 bg-white/5 hover:bg-emerald-500 text-white hover:text-black rounded-xl transition-all border border-white/10"
+        >
+          <Edit className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setDeleteConfirm(worker._id)}
+          className="p-2.5 bg-white/5 hover:bg-rose-500 text-white rounded-xl transition-all border border-white/10"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
 
       {deleteConfirm === worker._id && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800 mb-3">
-            Are you sure you want to delete {worker.name}?
-          </p>
-          <div className="flex justify-end space-x-2">
+        <div className="absolute inset-x-0 bottom-0 p-6 bg-black/90 backdrop-blur-md rounded-b-[1.5rem] border-t border-rose-500/50 animate-fade-in">
+          <p className="text-xs font-black text-rose-500 uppercase tracking-widest mb-4">Confirm Deletion?</p>
+          <div className="flex space-x-2">
             <button
               onClick={() => setDeleteConfirm(null)}
-              className="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+              className="flex-1 py-2 bg-white/10 text-white text-[10px] font-black uppercase rounded-lg"
             >
-              Cancel
+              Abort
             </button>
             <button
               onClick={() => handleDelete(worker._id)}
-              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+              className="flex-1 py-2 bg-rose-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg shadow-rose-600/20"
             >
-              Delete
+              Destroy
             </button>
           </div>
         </div>
@@ -210,119 +189,117 @@ const WorkerList = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Workers</h1>
-          <p className="text-gray-600 mt-1">Manage your restaurant staff</p>
-        </div>
-        <Link to="/add-worker" className="btn-primary flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>Add Worker</span>
-        </Link>
-      </div>
+    <div className="min-h-screen bg-black relative text-white pb-20">
+      {/* Background Image with Overlay */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-30"
+        style={{ backgroundImage: 'url("/background.png")' }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-black via-black/80 to-black" />
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-10 space-y-10">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 animate-fade-in">
+          <div>
+            <h1 className="text-5xl font-black text-white tracking-tighter uppercase mb-2">Personnel Assets</h1>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                <Activity className="h-3 w-3 text-emerald-500" />
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{workers.length} Total Units</span>
+              </div>
+              <div className="flex items-center space-x-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                <Briefcase className="h-3 w-3 text-blue-500" />
+                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{getUniqueRoles().length} Specialties</span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/add-worker')}
+            className="group flex items-center space-x-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs tracking-[0.2em] rounded-2xl transition-all shadow-2xl shadow-emerald-500/20"
+          >
+            <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform" />
+            <span>Recruit New Asset</span>
+          </button>
+        </div>
+
+        {/* Global Control Terminal */}
+        <div className="glass-card p-6 flex flex-col lg:flex-row gap-4 lg:items-center animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="relative flex-1 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50 group-focus-within:text-emerald-400 transition-colors" />
             <input
               type="text"
-              placeholder="Search workers..."
+              placeholder="Query Asset Metadata (Name, Role, ID)..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 input-field"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-sm font-bold placeholder:text-gray-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
             />
           </div>
 
-          {/* Role Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <select
-              value={selectedRole}
-              onChange={(e) => handleFilter(e.target.value)}
-              className="pl-10 input-field appearance-none"
-            >
-              <option value="All">All Roles</option>
-              {getUniqueRoles().map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
+          <div className="flex gap-4">
+            <div className="relative group">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-black uppercase tracking-widest appearance-none focus:outline-none focus:border-emerald-500/50 cursor-pointer"
+              >
+                <option value="All" className="bg-neutral-900">All Units</option>
+                {getUniqueRoles().map(role => (
+                  <option key={role} value={role} className="bg-neutral-900">{role}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative group">
+              <ArrowUpDown className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
+              <select
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split('-');
+                  setSortBy(field);
+                  setSortOrder(order);
+                }}
+                className="pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-xs font-black uppercase tracking-widest appearance-none focus:outline-none focus:border-emerald-500/50 cursor-pointer"
+              >
+                <option value="name-asc" className="bg-neutral-900">Sort: Name [A-Z]</option>
+                <option value="name-desc" className="bg-neutral-900">Sort: Name [Z-A]</option>
+                <option value="salary-desc" className="bg-neutral-900">Sort: Payroll [High]</option>
+                <option value="salary-asc" className="bg-neutral-900">Sort: Payroll [Low]</option>
+              </select>
+            </div>
           </div>
+        </div>
 
-          {/* Sort */}
-          <div className="relative">
-            <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <select
-              value={`${sortBy}-${sortOrder}`}
-              onChange={(e) => {
-                const [field, order] = e.target.value.split('-');
-                handleSort(field);
-              }}
-              className="pl-10 input-field appearance-none"
-            >
-              <option value="name-asc">Name (A-Z)</option>
-              <option value="name-desc">Name (Z-A)</option>
-              <option value="salary-asc">Salary (Low to High)</option>
-              <option value="salary-desc">Salary (High to Low)</option>
-              <option value="role-asc">Role (A-Z)</option>
-            </select>
+        {/* Assets Grid */}
+        {filteredWorkers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            {filteredWorkers.map(worker => (
+              <WorkerCard key={worker._id} worker={worker} />
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="glass-card py-32 text-center animate-fade-in">
+            <div className="h-20 w-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+              <Search className="h-10 w-10 text-gray-500" />
+            </div>
+            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">No Units Detected</h3>
+            <p className="text-gray-500 text-sm mt-2 font-medium">No personnel assets match your current filter parameters.</p>
+            <button
+              onClick={() => { setSearchQuery(''); setSelectedRole('All'); }}
+              className="mt-8 px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all"
+            >
+              Reset Terminal Query
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* Results Summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-gray-600">
-          Showing <span className="font-medium">{filteredWorkers.length}</span> of{' '}
-          <span className="font-medium">{workers.length}</span> workers
-        </p>
-        
-        {/* Collection Concepts Display */}
-        <div className="flex items-center space-x-4 text-sm text-gray-500">
-          <span>List: {workers.length}</span>
-          <span>Set: {getUniqueRoles().length} roles</span>
-          <span>Map: {Object.keys(workers.reduce((map, w) => {
-            map[w.role] = (map[w.role] || 0) + 1;
-            return map;
-          }, {})).length} groups</span>
-        </div>
-      </div>
-
-      {/* Workers Grid */}
-      {filteredWorkers.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredWorkers.map(worker => (
-            <WorkerCard key={worker._id} worker={worker} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No workers found</h3>
-          <p className="text-gray-600 mb-4">
-            {searchQuery || selectedRole !== 'All' 
-              ? 'Try adjusting your search or filters' 
-              : 'Get started by adding your first worker'
-            }
-          </p>
-          {!searchQuery && selectedRole === 'All' && (
-            <Link to="/add-worker" className="btn-primary">
-              Add Worker
-            </Link>
-          )}
-        </div>
-      )}
     </div>
   );
 };

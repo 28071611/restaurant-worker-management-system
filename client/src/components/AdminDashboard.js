@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { WorkerContext } from '../context/WorkerContext';
-import { formatIndianRupees, formatTotalPayroll } from '../utils/currencyUtils';
-import { 
-  Users, 
-  Star, 
-  TrendingUp, 
-  DollarSign, 
+import { formatIndianRupees } from '../utils/currencyUtils';
+import {
+  Users,
+  Star,
+  TrendingUp,
+  DollarSign,
   Calendar,
   Trophy,
   Settings,
@@ -17,7 +17,8 @@ import {
   BarChart3,
   Award,
   AlertCircle,
-  CheckCircle
+  MessageSquare,
+  Plus
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -36,8 +37,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardStats();
-    
-    // Keyboard shortcut for admin dashboard
+
     const handleKeyPress = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
         e.preventDefault();
@@ -52,8 +52,7 @@ const AdminDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      
-      // Fetch various stats
+
       const [ratingsData, complaintsData, employeeOfMonth] = await Promise.all([
         fetch('/api/reputation/ranking').then(res => res.json()),
         fetch('/api/analytics/dashboard').then(res => res.json()),
@@ -62,8 +61,8 @@ const AdminDashboard = () => {
 
       const ratings = ratingsData.success ? ratingsData.data : [];
       const totalRatings = ratings.reduce((sum, worker) => sum + worker.totalRatings, 0);
-      const avgRating = ratings.length > 0 
-        ? ratings.reduce((sum, worker) => sum + worker.avgRating, 0) / ratings.length 
+      const avgRating = ratings.length > 0
+        ? ratings.reduce((sum, worker) => sum + worker.avgRating, 0) / ratings.length
         : 0;
 
       setStats({
@@ -80,280 +79,244 @@ const AdminDashboard = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color, subtitle, trend }) => (
-    <div className="stat-card hover:shadow-lg transition-shadow duration-200">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
-          {trend && (
-            <div className={`flex items-center mt-2 text-sm ${
-              trend > 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {trend > 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <AlertCircle className="h-4 w-4 mr-1" />}
-              {trend > 0 ? '+' : ''}{trend}% from last month
-            </div>
-          )}
-        </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-    </div>
-  );
-
-  const QuickAction = ({ title, description, icon: Icon, color, onClick }) => (
-    <button
-      onClick={onClick}
-      className="p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 text-left"
-    >
-      <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center mb-4`}>
-        <Icon className="h-6 w-6 text-white" />
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600">{description}</p>
-    </button>
-  );
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex bg-black items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
-              >
-                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-              <h1 className="ml-4 text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">Administrator</p>
-              </div>
-              <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-primary-700">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <button
-                onClick={logout}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black relative text-white">
+      {/* Background Image with Overlay */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{ backgroundImage: 'url("/background.png")' }}
+      />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-black via-transparent to-black" />
 
-      <div className="flex">
+      <div className="relative z-10 flex h-screen overflow-hidden">
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-white shadow-md transition-all duration-300 overflow-hidden`}>
-          <nav className="mt-8 px-4">
-            <div className="space-y-2">
-              <button className="w-full flex items-center space-x-3 px-3 py-2 bg-primary-100 text-primary-700 rounded-lg">
-                <BarChart3 className="h-5 w-5" />
-                <span>Dashboard</span>
-              </button>
-              <button 
-                onClick={() => navigate('/workers')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+        <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} sidebar-glass transition-all duration-500 ease-in-out flex flex-col`}>
+          <div className="p-8">
+            <h2 className="text-2xl font-bold premium-gradient-text tracking-tighter">STAFFMASTER PRO</h2>
+            <p className="text-[10px] text-emerald-500 font-bold tracking-[0.2em] mt-1 uppercase">Admin Control Unit</p>
+          </div>
+
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            <button className="w-full flex items-center space-x-3 px-4 py-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+              <BarChart3 className="h-5 w-5" />
+              <span className="font-semibold">Core Terminal</span>
+            </button>
+            {[
+              { label: 'Personnel List', icon: Users, path: '/workers' },
+              { label: 'Recruit Worker', icon: Plus, path: '/add-worker' },
+              { label: 'User Feedback', icon: MessageSquare, path: '/reviews' },
+              { label: 'Staff Ranking', icon: Trophy, path: '/reputation' },
+              { label: 'Intelligence', icon: Award, path: '/analytics' },
+              { label: 'System Settings', icon: Settings, path: '/settings' }
+            ].map((item) => (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.path)}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition-all group"
               >
-                <Users className="h-5 w-5" />
-                <span>Workers</span>
+                <item.icon className="h-5 w-5 group-hover:text-emerald-500 transition-colors" />
+                <span className="font-medium">{item.label}</span>
               </button>
-              <button 
-                onClick={() => navigate('/add-worker')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <Users className="h-5 w-5" />
-                <span>Add Worker</span>
-              </button>
-              <button 
-                onClick={() => navigate('/reputation')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <Trophy className="h-5 w-5" />
-                <span>Reputation</span>
-              </button>
-              <button 
-                onClick={() => navigate('/analytics')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <BarChart3 className="h-5 w-5" />
-                <span>Analytics</span>
-              </button>
-              <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-                <Settings className="h-5 w-5" />
-                <span>Settings</span>
-              </button>
-            </div>
+            ))}
           </nav>
+
+          <div className="p-6 border-t border-white/5 bg-black/20">
+            <button
+              onClick={logout}
+              className="w-full flex items-center space-x-3 px-4 py-3 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-transparent hover:border-rose-500/20"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-bold uppercase text-xs tracking-widest">Terminate Session</span>
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Welcome Section */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name}!</h2>
-              <p className="text-gray-600 mt-1">Here's what's happening with your restaurant today.</p>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <StatCard
-                title="Total Workers"
-                value={stats.totalWorkers}
-                icon={Users}
-                color="bg-blue-500"
-                subtitle="Active staff members"
-                trend={12}
-              />
-              <StatCard
-                title="Total Ratings"
-                value={stats.totalRatings}
-                icon={Star}
-                color="bg-yellow-500"
-                subtitle="Customer feedback"
-                trend={8}
-              />
-              <StatCard
-                title="Average Rating"
-                value={stats.avgRating}
-                icon={Trophy}
-                color="bg-green-500"
-                subtitle="Out of 5 stars"
-                trend={5}
-              />
-              <StatCard
-                title="Total Complaints"
-                value={stats.totalComplaints}
-                icon={AlertCircle}
-                color="bg-red-500"
-                subtitle="Customer issues"
-                trend={-15}
-              />
-            </div>
-
-            {/* Employee of the Month */}
-            {stats.employeeOfMonth && (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 mb-8 border border-yellow-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="bg-yellow-400 p-3 rounded-full">
-                      <Award className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Employee of the Month</h3>
-                      <p className="text-gray-600">
-                        {stats.employeeOfMonth.workerId?.name} - {stats.employeeOfMonth.workerId?.role}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-yellow-600">
-                      {stats.employeeOfMonth.reputationScore}
-                    </div>
-                    <div className="text-sm text-gray-600">Reputation Score</div>
-                    <div className="text-lg font-bold text-green-600">
-                      {formatIndianRupees(stats.employeeOfMonth.bonusAmount)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <QuickAction
-                  title="Add Worker"
-                  description="Register a new staff member"
-                  icon={Users}
-                  color="bg-blue-500"
-                  onClick={() => navigate('/add-worker')}
-                />
-                <QuickAction
-                  title="View Analytics"
-                  description="Detailed performance metrics"
-                  icon={BarChart3}
-                  color="bg-purple-500"
-                  onClick={() => navigate('/analytics')}
-                />
-                <QuickAction
-                  title="Manage Reputation"
-                  description="Worker performance tracking"
-                  icon={Trophy}
-                  color="bg-yellow-500"
-                  onClick={() => navigate('/reputation')}
-                />
-                <QuickAction
-                  title="System Settings"
-                  description="Configure system preferences"
-                  icon={Settings}
-                  color="bg-gray-500"
-                  onClick={() => navigate('/settings')}
-                />
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-green-100 p-2 rounded-full">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">New worker registered</p>
-                      <p className="text-xs text-gray-500">John Doe joined as Chef - 2 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-yellow-100 p-2 rounded-full">
-                      <Star className="h-4 w-4 text-yellow-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">New rating received</p>
-                      <p className="text-xs text-gray-500">Sarah Smith rated Jane Wilson 5 stars - 1 hour ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <Trophy className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Employee of the Month selected</p>
-                      <p className="text-xs text-gray-500">Mike Johnson selected for January - 3 hours ago</p>
-                    </div>
-                  </div>
+        <main className="flex-1 overflow-y-auto p-4 md:p-10 space-y-10">
+          <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-fade-in">
+            <div className="flex items-center space-x-5">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-3 glass-card hover:bg-white/10 text-white rounded-2xl transition-all shadow-xl"
+              >
+                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">Admin Panel</h1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-gray-400 text-sm font-medium">Node Primary • Database Linked</p>
                 </div>
               </div>
             </div>
+
+            <div className="flex items-center space-x-4 glass-card p-4 border-emerald-500/20 shadow-emerald-500/5">
+              <div className="text-right">
+                <p className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</p>
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest">SYSTEM OVERSEER</p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-tr from-emerald-600 to-green-400 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/40 border border-white/20">
+                <span className="text-xl font-black text-white">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </header>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <StatCard title="Total Staff" value={stats.totalWorkers} icon={Users} color="from-blue-600 to-indigo-700" pulse />
+            <StatCard title="Avg Quality" value={stats.avgRating} icon={Star} color="from-amber-400 to-orange-600" />
+            <StatCard title="Reviews" value={stats.totalRatings} icon={MessageSquare} color="from-emerald-500 to-teal-700" />
+            <StatCard title="Alerts" value={stats.totalComplaints} icon={AlertCircle} color="from-rose-600 to-red-800" />
           </div>
+
+          {/* Personnel Intel - Table showing personal details */}
+          <section className="glass-card p-8 animate-fade-in border-t border-white/10" style={{ animationDelay: '200ms' }}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+              <div>
+                <h3 className="text-3xl font-black text-white tracking-tight uppercase">Worker Intelligence</h3>
+                <p className="text-gray-400 text-sm mt-1 font-medium">Full staff directory with personal credentials and payroll data</p>
+              </div>
+              <button
+                onClick={() => navigate('/workers')}
+                className="px-8 py-3 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl transition-all hover:bg-emerald-500 shadow-xl"
+              >
+                Access Full Records
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="table-glass">
+                <thead>
+                  <tr>
+                    <th>Worker Identification</th>
+                    <th>Role & Unit</th>
+                    <th>Contact Credentials</th>
+                    <th>Salary (INR)</th>
+                    <th>Operating Shift</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workers.length > 0 ? workers.slice(0, 8).map((worker) => (
+                    <tr key={worker._id} className="group cursor-pointer" onClick={() => navigate(`/worker/${worker._id}`)}>
+                      <td className="flex items-center space-x-4">
+                        <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner group-hover:border-emerald-500/50 transition-colors">
+                          {worker.employeeImage?.filename ? (
+                            <img src={`/uploads/${worker.employeeImage.filename}`} className="h-full w-full object-cover rounded-2xl" alt="" />
+                          ) : (
+                            <span className="text-lg font-black text-white/20 group-hover:text-emerald-500 transition-colors">{worker.name.charAt(0)}</span>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{worker.name}</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{worker.email || 'NO_IDENT_LINK'}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex flex-col">
+                          <span className="text-white font-bold text-sm tracking-tight">{worker.role}</span>
+                          <span className="text-emerald-500 text-[10px] font-black uppercase tracking-tighter">{worker.department} Unit</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex items-center space-x-2 text-gray-300 font-mono text-xs">
+                          <Phone className="h-3 w-3 text-emerald-500/50" />
+                          <span>+91 {worker.phone}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-emerald-400 font-black text-base">
+                          {formatIndianRupees(worker.salary)}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3 text-emerald-500" />
+                          <span className="text-xs font-bold text-white/80 uppercase">
+                            {worker.shift}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${worker.status === 'Active'
+                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          }`}>
+                          {worker.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="6" className="text-center py-20 text-gray-500 font-bold uppercase tracking-widest">No Intelligence Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* Unit Champion Showcase */}
+          {stats.employeeOfMonth && (
+            <div className="glass-card p-10 premium-gradient relative overflow-hidden animate-fade-in group" style={{ animationDelay: '300ms' }}>
+              <Trophy className="absolute -right-16 -bottom-16 h-80 w-80 text-white/10 transform -rotate-12 group-hover:scale-110 transition-transform duration-700" />
+              <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
+                <div className="flex items-center space-x-8">
+                  <div className="h-28 w-28 bg-white/10 backdrop-blur-2xl rounded-3xl flex items-center justify-center border border-white/20 shadow-2xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                    <Award className="h-14 w-14 text-white relative z-10" />
+                  </div>
+                  <div>
+                    <p className="text-emerald-200 text-xs font-black uppercase tracking-[0.3em] mb-2">Internal Apex Performance</p>
+                    <h3 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">UNIT CHAMPION</h3>
+                    <p className="text-white/80 text-2xl font-bold mt-2 tracking-tight">
+                      {stats.employeeOfMonth.workerId?.name} • <span className="text-white/60">{stats.employeeOfMonth.workerId?.role}</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center lg:items-end">
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-6xl font-black text-white leading-none">{stats.employeeOfMonth.reputationScore}</span>
+                    <span className="text-sm font-black text-white/50 uppercase tracking-widest">PTS</span>
+                  </div>
+                  <div className="text-xs font-black text-white/40 uppercase tracking-[0.5em] mt-1 mb-6">Reputation Index</div>
+                  <div className="bg-white text-emerald-700 px-8 py-3 rounded-2xl font-black text-xl shadow-2xl transform hover:scale-105 transition-transform cursor-default">
+                    {formatIndianRupees(stats.employeeOfMonth.bonusAmount)} PRIZE
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
   );
 };
+
+const StatCard = ({ title, value, icon: Icon, color, pulse }) => (
+  <div className="glass-card p-8 flex items-center justify-between relative overflow-hidden group">
+    <div className={`absolute top-0 right-0 h-32 w-32 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity blur-3xl`} />
+    <div className="relative z-10">
+      <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">{title}</p>
+      <div className="flex items-baseline space-x-1">
+        <p className="text-4xl font-black text-white tracking-tighter">{value}</p>
+        {pulse && <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping mb-1" />}
+      </div>
+    </div>
+    <div className={`h-16 w-16 rounded-2xl bg-gradient-to-tr ${color} flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 border border-white/10`}>
+      <Icon className="h-8 w-8 text-white" />
+    </div>
+  </div>
+);
 
 export default AdminDashboard;
