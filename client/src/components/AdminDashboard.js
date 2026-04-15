@@ -173,8 +173,65 @@ const AdminDashboard = () => {
             </div>
           </header>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          {/* System Terminal (Dynamic Feed) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <div className="lg:col-span-2 glass-card p-0 h-80 flex flex-col overflow-hidden border-t border-emerald-500/30">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/5">
+                <div className="flex items-center space-x-3">
+                  <div className="flex space-x-1">
+                    <div className="h-2 w-2 rounded-full bg-rose-500" />
+                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Global Interaction Terminal</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                   <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest leading-none">Live Connection</span>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 scroll-hide terminal-flicker">
+                {[
+                  { time: '14:35:12', msg: 'System Boot Initialization... [OK]', type: 'system' },
+                  { time: '14:36:04', msg: 'User ID: Client_092 Authenticated.', type: 'auth' },
+                  { time: '14:37:45', msg: 'Incoming Rating Protocol Detected: +5 Points Assigned to Chef Unit (Ravi Kumar).', type: 'rating' },
+                  { time: '14:39:10', msg: 'Alert: System Incident Logged at Table 04. Investigating...', type: 'alert' },
+                  { time: '14:41:22', msg: 'Reputation Matrix Updated for All Personnel Units.', type: 'reputation' },
+                  { time: '14:42:00', msg: 'Admin Sync Completed Successfully.', type: 'system' }
+                ].map((log, i) => (
+                  <div key={i} className="flex space-x-4 font-mono text-xs">
+                     <span className="text-emerald-500/50">[{log.time}]</span>
+                     <span className={`${
+                       log.type === 'alert' ? 'text-rose-500' : 
+                       log.type === 'rating' ? 'text-emerald-400' : 
+                       log.type === 'auth' ? 'text-blue-400' : 
+                       'text-gray-400'
+                     }`}>
+                       {log.msg}
+                     </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card p-10 bg-gradient-to-br from-emerald-600/10 to-transparent flex flex-col items-center justify-center text-center relative overflow-hidden group">
+               <div className="absolute top-0 right-0 h-32 w-32 bg-emerald-500/10 blur-[60px] group-hover:bg-emerald-500/20 transition-all duration-700" />
+               <Award className="h-16 w-16 text-emerald-500 mb-6 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-110 transition-transform" />
+               <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Operational Apex</h3>
+               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
+                 System currently performing at 98.4% efficiency. All worker units synchronized.
+               </p>
+               <button 
+                 onClick={() => navigate('/analytics')}
+                 className="mt-8 px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-500 transition-colors"
+               >
+                 Deep Intelligence
+               </button>
+            </div>
+          </div>
+
+          {/* Main Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
             <StatCard title="Total Staff" value={stats.totalWorkers} icon={Users} color="from-blue-600 to-indigo-700" pulse />
             <StatCard title="Avg Quality" value={stats.avgRating} icon={Star} color="from-amber-400 to-orange-600" />
             <StatCard title="Reviews" value={stats.totalRatings} icon={MessageSquare} color="from-emerald-500 to-teal-700" />

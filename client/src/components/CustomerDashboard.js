@@ -13,7 +13,11 @@ import {
   X,
   Utensils,
   AlertCircle,
-  ThumbsUp
+  ThumbsUp,
+  ChevronRight,
+  Shield,
+  Activity,
+  Heart
 } from 'lucide-react';
 
 const CustomerDashboard = () => {
@@ -36,8 +40,6 @@ const CustomerDashboard = () => {
   const fetchCustomerData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch customer's ratings and complaints
       const [ratingsData, complaintsData] = await Promise.all([
         fetch('/api/reputation/ratings').then(res => res.json()),
         fetch('/api/complaints/customer').then(res => res.json())
@@ -70,316 +72,286 @@ const CustomerDashboard = () => {
   };
 
   const StatCard = ({ title, value, icon: Icon, color, subtitle }) => (
-    <div className="stat-card hover:shadow-lg transition-shadow duration-200">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
+    <div className="glass-card p-8 flex items-center justify-between relative overflow-hidden group">
+      <div className={`absolute top-0 right-0 h-32 w-32 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity blur-3xl`} />
+      <div className="relative z-10">
+        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">{title}</p>
+        <p className="text-4xl font-black text-white tracking-tighter">{value}</p>
+        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">{subtitle}</p>
+      </div>
+      <div className={`h-16 w-16 rounded-2xl bg-gradient-to-tr ${color} flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 border border-white/10`}>
+        <Icon className="h-8 w-8 text-white" />
       </div>
     </div>
   );
 
-  const QuickAction = ({ title, description, icon: Icon, color, onClick }) => (
+  const ActionButton = ({ title, description, icon: Icon, color, onClick }) => (
     <button
       onClick={onClick}
-      className="p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200 text-left w-full"
+      className="glass-card p-8 text-left group hover:border-emerald-500/30 transition-all duration-500 relative overflow-hidden"
     >
-      <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center mb-4`}>
+      <div className={`absolute top-0 right-0 h-24 w-24 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity blur-2xl`} />
+      <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform`}>
         <Icon className="h-6 w-6 text-white" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600">{description}</p>
+      <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">{title}</h3>
+      <p className="text-gray-500 text-sm font-medium leading-relaxed">{description}</p>
+      <div className="mt-6 flex items-center text-emerald-500 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+        Initiate Sequence <ChevronRight className="ml-1 h-3 w-3" />
+      </div>
     </button>
   );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex bg-black items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
-              >
-                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-              <h1 className="ml-4 text-2xl font-bold text-gray-900">Customer Portal</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">Customer</p>
-              </div>
-              <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-green-700">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <button
-                onClick={logout}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black relative text-white">
+      {/* Background decoration */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-black via-black/90 to-black" />
+      <div className="fixed top-0 right-0 h-[600px] w-[600px] bg-emerald-500/5 blur-[120px] rounded-full -mr-64 -mt-64" />
+      <div className="fixed bottom-0 left-0 h-[600px] w-[600px] bg-blue-500/5 blur-[120px] rounded-full -ml-64 -mb-64" />
 
-      <div className="flex">
+      <div className="relative z-10 flex h-screen overflow-hidden">
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-white shadow-md transition-all duration-300 overflow-hidden`}>
-          <nav className="mt-8 px-4">
-            <div className="space-y-2">
-              <button className="w-full flex items-center space-x-3 px-3 py-2 bg-green-100 text-green-700 rounded-lg">
-                <User className="h-5 w-5" />
-                <span>Dashboard</span>
-              </button>
-              <button 
-                onClick={() => navigate('/rate-worker')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+        <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} sidebar-glass transition-all duration-500 ease-in-out flex flex-col`}>
+          <div className="p-8">
+            <h2 className="text-2xl font-bold premium-gradient-text tracking-tighter uppercase italic">Guest Core</h2>
+            <p className="text-[10px] text-emerald-500 font-bold tracking-[0.2em] mt-1 uppercase">Customer Interface Unit</p>
+          </div>
+
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+            <button className="w-full flex items-center space-x-3 px-4 py-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+              <Activity className="h-5 w-5" />
+              <span className="font-semibold uppercase tracking-tight text-sm text-white">Service Hub</span>
+            </button>
+            {[
+              { label: 'Review Personnel', icon: Star, path: '/rate-worker' },
+              { label: 'Log Incident', icon: MessageSquare, path: '/file-complaint' },
+              { label: 'Activity Logs', icon: Clock, path: '/my-ratings' },
+              { label: 'Identity Profile', icon: User, path: '/profile' }
+            ].map((item) => (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.path)}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-gray-500 hover:bg-white/5 hover:text-white rounded-xl transition-all group"
               >
-                <Star className="h-5 w-5" />
-                <span>Rate Worker</span>
+                <item.icon className="h-5 w-5 group-hover:text-emerald-500 transition-colors" />
+                <span className="font-medium uppercase tracking-tight text-xs text-white/60">{item.label}</span>
               </button>
-              <button 
-                onClick={() => navigate('/file-complaint')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <MessageSquare className="h-5 w-5" />
-                <span>File Complaint</span>
-              </button>
-              <button 
-                onClick={() => navigate('/my-ratings')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <Clock className="h-5 w-5" />
-                <span>My Ratings</span>
-              </button>
-              <button 
-                onClick={() => navigate('/profile')}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <User className="h-5 w-5" />
-                <span>My Profile</span>
-              </button>
-            </div>
+            ))}
           </nav>
+
+          <div className="p-6 border-t border-white/5 bg-black/20">
+            <button
+              onClick={logout}
+              className="w-full flex items-center space-x-3 px-4 py-3 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-transparent hover:border-rose-500/20"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-bold uppercase text-xs tracking-widest">Logout Cyber-Session</span>
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Welcome Section */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Welcome, {user?.name}!</h2>
-              <p className="text-gray-600 mt-1">Thank you for being our valued customer.</p>
+        <main className="flex-1 overflow-y-auto p-4 md:p-10 space-y-12">
+          <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-fade-in">
+            <div className="flex items-center space-x-5">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-3 glass-card hover:bg-white/10 text-white rounded-2xl transition-all shadow-xl"
+              >
+                {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">Welcome, {user?.name.split(' ')[0]}</h1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">Client Authenticated • Secure Link</p>
+                </div>
+              </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <StatCard
-                title="Total Ratings"
-                value={stats.totalRatings}
+            <div className="flex items-center space-x-4 glass-card p-4 border-emerald-500/20 shadow-emerald-500/5">
+              <div className="text-right">
+                <p className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</p>
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase italic">Elite Guest Status</p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-tr from-emerald-600 to-green-400 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/40 border border-white/20">
+                <span className="text-xl font-black text-white">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </header>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <StatCard
+              title="Contributions"
+              value={stats.totalRatings}
+              icon={Star}
+              color="from-amber-400 to-orange-600"
+              subtitle="Feedback Metrics"
+            />
+            <StatCard
+              title="Quality Index"
+              value={stats.avgRating}
+              icon={TrendingUp}
+              color="from-emerald-500 to-teal-700"
+              subtitle="Score Provided"
+            />
+            <StatCard
+              title="Incident Log"
+              value={stats.totalComplaints}
+              icon={MessageSquare}
+              color="from-rose-600 to-red-800"
+              subtitle="Alerts Synchronized"
+            />
+          </div>
+
+          {/* Quick Actions */}
+          <section className="animate-fade-in shadow-2xl" style={{ animationDelay: '200ms' }}>
+            <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-8 ml-2">Override Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ActionButton
+                title="Rate Personnel"
+                description="Synchronize performance metrics for our dedicated staff units."
                 icon={Star}
-                color="bg-yellow-500"
-                subtitle="Your feedback contributions"
+                color="bg-amber-500"
+                onClick={() => navigate('/rate-worker')}
               />
-              <StatCard
-                title="Average Rating Given"
-                value={stats.avgRating}
-                icon={TrendingUp}
-                color="bg-green-500"
-                subtitle="Out of 5 stars"
-              />
-              <StatCard
-                title="Complaints Filed"
-                value={stats.totalComplaints}
+              <ActionButton
+                title="File Incident"
+                description="Immediately log an alert for any operational discrepancies."
                 icon={MessageSquare}
-                color="bg-blue-500"
-                subtitle="Issues reported"
+                color="bg-rose-600"
+                onClick={() => navigate('/file-complaint')}
+              />
+              <ActionButton
+                title="Service Matrix"
+                description="Review current restaurant operational offerings and data."
+                icon={Utensils}
+                color="bg-emerald-600"
+                onClick={() => navigate('/menu')}
               />
             </div>
+          </section>
 
-            {/* Quick Actions */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <QuickAction
-                  title="Rate Worker"
-                  description="Share your experience with our staff"
-                  icon={Star}
-                  color="bg-yellow-500"
-                  onClick={() => navigate('/rate-worker')}
-                />
-                <QuickAction
-                  title="File Complaint"
-                  description="Report any issues or concerns"
-                  icon={MessageSquare}
-                  color="bg-red-500"
-                  onClick={() => navigate('/file-complaint')}
-                />
-                <QuickAction
-                  title="View Menu"
-                  description="Check our restaurant menu"
-                  icon={Utensils}
-                  color="bg-green-500"
-                  onClick={() => navigate('/menu')}
-                />
+          {/* Activity Matrix */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '300ms' }}>
+            {/* Recent Ratings Matrix */}
+            <section className="glass-card p-10 border-t border-white/10">
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">Feedback Matrix</h3>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Latest synchronization data</p>
+                </div>
+                <Star className="h-6 w-6 text-amber-500/30" />
               </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Ratings */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Ratings</h3>
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  {recentRatings.length > 0 ? (
-                    <div className="space-y-4">
-                      {recentRatings.map((rating) => (
-                        <div key={rating._id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0">
-                          <div className="bg-yellow-100 p-2 rounded-full">
-                            <Star className="h-4 w-4 text-yellow-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium text-gray-900">
-                                {rating.workerId?.name || 'Unknown Worker'}
-                              </p>
-                              <div className="flex items-center space-x-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-3 w-3 ${
-                                      i < rating.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              {new Date(rating.date).toLocaleDateString()} - {rating.serviceType}
-                            </p>
-                            {rating.feedback && (
-                              <p className="text-sm text-gray-600 mt-1 italic">"{rating.feedback}"</p>
-                            )}
-                          </div>
+              
+              {recentRatings.length > 0 ? (
+                <div className="space-y-6">
+                  {recentRatings.map((rating) => (
+                    <div key={rating._id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-amber-500/20 transition-all">
+                      <div className="flex items-center space-x-4 text-white">
+                        <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                           <span className="font-black text-amber-500">{rating.workerId?.name?.charAt(0)}</span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No ratings yet</p>
-                      <button
-                        onClick={() => navigate('/rate-worker')}
-                        className="mt-4 btn-primary"
-                      >
-                        Rate a Worker
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Recent Complaints */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Complaints</h3>
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  {recentComplaints.length > 0 ? (
-                    <div className="space-y-4">
-                      {recentComplaints.map((complaint) => (
-                        <div key={complaint._id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0">
-                          <div className="bg-red-100 p-2 rounded-full">
-                            <MessageSquare className="h-4 w-4 text-red-600" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium text-gray-900">
-                                {complaint.workerId?.name || 'General'}
-                              </p>
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                complaint.status === 'Resolved' 
-                                  ? 'bg-green-100 text-green-800'
-                                  : complaint.status === 'Investigating'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {complaint.status}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600">{complaint.complaint}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {new Date(complaint.date).toLocaleDateString()} - {complaint.severity}
-                            </p>
-                          </div>
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-tight">{rating.workerId?.name}</p>
+                          <p className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">{rating.serviceType}</p>
                         </div>
-                      ))}
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${i < rating.rating ? 'text-amber-500 fill-amber-500' : 'text-white/10'}`}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No complaints filed</p>
-                      <button
-                        onClick={() => navigate('/file-complaint')}
-                        className="mt-4 btn-secondary"
-                      >
-                        File a Complaint
-                      </button>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div className="text-center py-20 opacity-30">
+                  <Star className="h-16 w-16 mx-auto mb-4" />
+                  <p className="text-[10px] uppercase font-black tracking-widest leading-none">Matrix Empty</p>
+                </div>
+              )}
+            </section>
 
-            {/* Restaurant Info */}
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Restaurant Information</h3>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-blue-500 p-3 rounded-full">
-                    <Utensils className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">Restaurant Worker Management System</h4>
-                    <p className="text-gray-600 mt-1">
-                      Thank you for choosing our restaurant! Your feedback helps us improve our service quality.
-                    </p>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <div className="flex items-center space-x-1">
-                        <ThumbsUp className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-gray-700">Quality Service</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm text-gray-700">Expert Staff</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Award className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm text-gray-700">Award Winning</span>
-                      </div>
-                    </div>
-                  </div>
+            {/* Recent Complaints Matrix */}
+            <section className="glass-card p-10 border-t border-white/10">
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">Alert Archives</h3>
+                  <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">Stored discrepancy packets</p>
                 </div>
+                <MessageSquare className="h-6 w-6 text-rose-500/30" />
               </div>
-            </div>
+              
+              {recentComplaints.length > 0 ? (
+                <div className="space-y-6">
+                  {recentComplaints.map((complaint) => (
+                    <div key={complaint._id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-rose-500/20 transition-all">
+                      <div className="flex items-center space-x-4 text-white max-w-[70%]">
+                        <div className="h-10 w-10 rounded-xl bg-rose-600/10 flex items-center justify-center border border-rose-600/20">
+                           <Shield className="h-4 w-4 text-rose-600" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-black uppercase tracking-tight truncate">{complaint.complaint}</p>
+                          <p className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">{new Date(complaint.date).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-lg border ${
+                        complaint.status === 'Resolved' 
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                      }`}>
+                        {complaint.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 opacity-30">
+                  <MessageSquare className="h-16 w-16 mx-auto mb-4" />
+                  <p className="text-[10px] uppercase font-black tracking-widest leading-none">Archives Clear</p>
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* System Protocol Message */}
+          <div className="glass-card p-10 bg-gradient-to-r from-emerald-500/10 to-transparent border-t border-emerald-500/30 animate-fade-in" style={{ animationDelay: '400ms' }}>
+             <div className="flex items-center space-x-8">
+               <div className="h-20 w-20 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+                  <Heart className="h-10 w-10 text-white fill-white animate-pulse" />
+               </div>
+               <div>
+                 <h4 className="text-2xl font-black text-white uppercase tracking-tight mb-2">The Guest Protocol</h4>
+                 <p className="text-gray-400 text-sm font-medium max-w-2xl leading-relaxed">
+                   Your integration with our management system is vital for staff optimization. Every data-point you provide enhances our commitment to premium service excellence.
+                 </p>
+                 <div className="flex items-center space-x-6 mt-4">
+                    <div className="flex items-center space-x-2">
+                       <Shield className="h-3 w-3 text-emerald-500" />
+                       <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Secure Interaction</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                       <ThumbsUp className="h-3 w-3 text-emerald-500" />
+                       <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Quality Verified</span>
+                    </div>
+                 </div>
+               </div>
+             </div>
           </div>
         </main>
       </div>

@@ -7,6 +7,12 @@
 
 const mongoose = require('mongoose');
 const { Worker } = require('./server/models/Worker');
+const Rating = require('./server/models/Rating');
+const Complaint = require('./server/models/Complaint');
+const Attendance = require('./server/models/Attendance');
+const Workload = require('./server/models/Workload');
+const EmployeeOfMonth = require('./server/models/EmployeeOfMonth');
+const ReputationController = require('./server/controllers/reputationController');
 
 // 100 Workers Dataset with unique MongoDB format
 const workersDataset = [
@@ -1123,51 +1129,103 @@ async function seedDatabase() {
     
     console.log('🔗 Connected to MongoDB');
 
-    // Clear existing workers (optional - remove if you want to keep existing data)
-    console.log('🗑️  Clearing existing workers...');
-    await Worker.deleteMany({});
-    console.log('✅ Existing workers cleared');
+    // Clear existing data
+    console.log('🗑️  Clearing existing data...');
+    await Promise.all([
+        Worker.deleteMany({}),
+        Rating.deleteMany({}),
+        Complaint.deleteMany({}),
+        Attendance.deleteMany({}),
+        Workload.deleteMany({}),
+        EmployeeOfMonth.deleteMany({})
+    ]);
+    console.log('✅ Existing data cleared');
 
     // Insert workers in batches for better performance
     console.log('📊 Inserting 100 workers...');
-    const batchSize = 10;
-    let inserted = 0;
+    const insertedWorkers = await Worker.insertMany(workersDataset);
+    console.log(`✅ Successfully seeded ${insertedWorkers.length} workers!`);
 
-    for (let i = 0; i < workersDataset.length; i += batchSize) {
-      const batch = workersDataset.slice(i, i + batchSize);
-      await Worker.insertMany(batch);
-      inserted += batch.length;
-      console.log(`📈 Inserted ${inserted}/${workersDataset.length} workers`);
+    console.log('🎲 Generating randomized performance metrics...');
+    
+    const now = new Date();
+    const serviceTypes = ['Dine-in', 'Takeaway', 'Home Delivery', 'Event Hosting'];
+    const feedbackPool = [
+        'Excellent service!', 'Very professional.', 'Great attitude.', 
+        'Good coordination.', 'Highly experienced.', 'Speedy delivery.',
+        'Friendly staff.', 'Impressive performance.', 'Needs more speed.', 'Average service.'
+    ];
+
+    for (const worker of insertedWorkers) {
+        // 1. Generate 5-15 random ratings
+        const ratingCount = Math.floor(Math.random() * 10) + 5;
+        const ratings = [];
+        for (let j = 0; j < ratingCount; j++) {
+            ratings.push({
+                workerId: worker._id,
+                rating: Math.floor(Math.random() * 2) + 4, // Mostly 4-5 stars
+                feedback: feedbackPool[Math.floor(Math.random() * feedbackPool.length)],
+                clientName: `Customer ${Math.floor(Math.random() * 1000)}`,
+                serviceType: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
+                date: new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+            });
+        }
+        await Rating.insertMany(ratings);
+
+        // 2. Generate random attendance for last 30 days
+        const attendance = [];
+        for (let d = 0; d < 30; d++) {
+            const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
+            attendance.push({
+                workerId: worker._id,
+                date: date,
+                status: Math.random() > 0.05 ? 'Present' : 'Absent',
+                shift: worker.shift
+            });
+        }
+        await Attendance.insertMany(attendance);
+
+        // 3. Generate random workload for last 30 days
+        const workload = [];
+        for (let d = 0; d < 30; d++) {
+            const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
+            workload.push({
+                workerId: worker._id,
+                date: date,
+                performanceScore: Math.floor(Math.random() * 30) + 70, // 70-100 score
+                tasksCompleted: Math.floor(Math.random() * 10) + 5
+            });
+        }
+        await Workload.insertMany(workload);
+
+        // 4. Occasional complaints (10% chance for some workers)
+        if (Math.random() > 0.9) {
+            const complaint = new Complaint({
+                workerId: worker._id,
+                complaint: 'Delay in operational execution observed during peak hours.',
+                severity: 'Medium',
+                status: 'Resolved',
+                date: new Date(now.getTime() - Math.random() * 20 * 24 * 60 * 60 * 1000)
+            });
+            await complaint.save();
+        }
     }
 
-    console.log('✅ Successfully seeded 100 workers!');
+    console.log('👑 Selecting Unit Champion (Employee of the Month)...');
+    // Simulate req/res for the controller call
+    const mockReq = { body: { month: now.getMonth() + 1, year: now.getFullYear() } };
+    const mockRes = { 
+        status: () => mockRes, 
+        json: (data) => console.log(`🏆 Elite Status Assigned: ${data.data.employee.workerId.name}`) 
+    };
+    await ReputationController.selectEmployeeOfMonth(mockReq, mockRes);
 
-    // Display statistics
-    const totalWorkers = await Worker.countDocuments();
-    const byDepartment = await Worker.aggregate([
-      { $group: { _id: '$department', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]);
-    const byRole = await Worker.aggregate([
-      { $group: { _id: '$role', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]);
-
-    console.log('\n📊 Database Statistics:');
-    console.log(`👥 Total Workers: ${totalWorkers}`);
-    console.log('\n🏢 By Department:');
-    byDepartment.forEach(dept => {
-      console.log(`   ${dept._id}: ${dept.count} workers`);
-    });
-    console.log('\n👨‍💼 By Role:');
-    byRole.forEach(role => {
-      console.log(`   ${role._id}: ${role.count} workers`);
-    });
+    console.log('✅ Performance simulation synchronized!');
 
     // Close connection
     await mongoose.connection.close();
     console.log('\n🔌 Database connection closed');
-    console.log('🎉 Seeding completed successfully!');
+    console.log('🎉 Full Working Model Seeding Completed!');
 
   } catch (error) {
     console.error('❌ Error seeding database:', error);

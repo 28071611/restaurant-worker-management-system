@@ -43,10 +43,10 @@ function App() {
     <AuthProvider>
       <WorkerProvider>
         <Router>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-black transition-colors duration-500">
             <KeyboardShortcuts />
             <Navbar />
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-8 pt-24">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<HomeRedirect />} />

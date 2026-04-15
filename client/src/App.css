@@ -110,3 +110,43 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* New Dynamic Classes */
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0), 0 0 20px rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2); }
+}
+
+.glow-pulse {
+  animation: neonPulse 2s infinite ease-in-out;
+}
+
+@keyframes terminalFlicker {
+  0% { opacity: 0.9; }
+  5% { opacity: 0.5; }
+  10% { opacity: 0.9; }
+  15% { opacity: 1; }
+  20% { opacity: 0.8; }
+  25% { opacity: 0.9; }
+  80% { opacity: 0.9; }
+  100% { opacity: 1; }
+}
+
+.terminal-flicker {
+  animation: terminalFlicker 4s infinite linear;
+}
+
+.glass-surface {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

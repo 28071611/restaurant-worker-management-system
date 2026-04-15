@@ -92,8 +92,16 @@ const WorkerList = () => {
     }
   };
 
-  const WorkerCard = ({ worker }) => (
-    <div className="glass-card p-6 flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden">
+  const WorkerCard = ({ worker }) => {
+    const isMatched = searchQuery.trim() !== '' && (
+      worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      worker.role.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+      <div className={`glass-card p-6 flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden transition-all duration-500 ${
+        isMatched ? 'border-emerald-500/50 glow-pulse scale-[1.02]' : ''
+      }`}>
       <div className={`absolute top-0 right-0 h-24 w-24 bg-gradient-to-br ${worker.status === 'Active' ? 'from-emerald-500/20' : 'from-amber-500/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-2xl`} />
 
       <div>
@@ -185,7 +193,8 @@ const WorkerList = () => {
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
