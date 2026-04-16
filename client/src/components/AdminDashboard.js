@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { WorkerContext } from '../context/WorkerContext';
@@ -36,9 +37,11 @@ const AdminDashboard = () => {
     employeeOfMonth: null
   });
   const [loading, setLoading] = useState(true);
+  const [recentReviews, setRecentReviews] = useState([]);
 
   useEffect(() => {
     fetchDashboardStats();
+    fetchRecentReviews();
 
     const handleKeyPress = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
@@ -50,6 +53,17 @@ const AdminDashboard = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [navigate]);
+
+  const fetchRecentReviews = async () => {
+    try {
+      const response = await axios.get('/api/reviews');
+      if (response.data.success) {
+        setRecentReviews(response.data.data.slice(0, 5)); // Show 5 most recent
+      }
+    } catch (error) {
+      setRecentReviews([]);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -237,6 +251,43 @@ const AdminDashboard = () => {
             <StatCard title="Reviews" value={stats.totalRatings} icon={MessageSquare} color="from-emerald-500 to-teal-700" />
             <StatCard title="Alerts" value={stats.totalComplaints} icon={AlertCircle} color="from-rose-600 to-red-800" />
           </div>
+
+          {/* Recent Reviews Section */}
+          <section className="glass-card p-8 animate-fade-in border-t border-white/10 mb-12" style={{ animationDelay: '500ms' }}>
+            <h3 className="text-2xl font-black text-white tracking-tight uppercase mb-6">Recent Customer Reviews</h3>
+            {recentReviews.length === 0 ? (
+              <p className="text-gray-400 italic">No reviews available.</p>
+            ) : (
+              <div className="space-y-6">
+                {recentReviews.map((review) => (
+                  <div key={review._id} className="bg-white/10 rounded-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between border border-white/10">
+                    <div className="flex items-center gap-4 mb-4 md:mb-0">
+                      <div className="h-12 w-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xl">
+                        {review.customer?.name?.charAt(0) || '?'}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-white uppercase tracking-tighter">{review.customer?.name || 'Anonymous'}</h4>
+                        <p className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                        {review.worker && (
+                          <div className="inline-flex items-center gap-2 px-2 py-1 bg-neutral-900 text-white rounded-lg text-[10px] font-black tracking-widest uppercase mt-1">
+                            Staff: {review.worker.name} ({review.worker.role})
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex gap-1 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={`inline-block h-4 w-4 rounded-full ${i < review.rating ? 'bg-amber-400' : 'bg-gray-700'}`}></span>
+                        ))}
+                      </div>
+                      <p className="text-gray-100 italic">"{review.comment}"</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
 
           {/* Personnel Intel - Table showing personal details */}
           <section className="glass-card p-8 animate-fade-in border-t border-white/10" style={{ animationDelay: '200ms' }}>

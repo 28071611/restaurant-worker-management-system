@@ -64,10 +64,12 @@ const RatingForm = () => {
     setSuccess('');
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/reputation/ratings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify(formData)
       });
