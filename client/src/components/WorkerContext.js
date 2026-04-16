@@ -59,7 +59,7 @@ export const WorkerProvider = ({ children }) => {
   const fetchWorkers = async () => {
     dispatch({ type: actionTypes.SET_LOADING, payload: true });
     try {
-      const response = await fetch('http://localhost:5001/api/workers');
+      const response = await fetch('/api/workers');
       const data = await response.json();
       
       if (data.success) {
@@ -76,7 +76,7 @@ export const WorkerProvider = ({ children }) => {
   // Add worker
   const addWorker = async (workerData) => {
     try {
-      const response = await fetch('http://localhost:5001/api/workers', {
+      const response = await fetch('/api/workers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export const WorkerProvider = ({ children }) => {
   // Update worker
   const updateWorker = async (id, workerData) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/workers/${id}`, {
+      const response = await fetch(`/api/workers/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export const WorkerProvider = ({ children }) => {
   // Delete worker
   const deleteWorker = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/workers/${id}`, {
+      const response = await fetch(`/api/workers/${id}`, {
         method: 'DELETE',
       });
       const data = await response.json();
@@ -141,7 +141,7 @@ export const WorkerProvider = ({ children }) => {
   // Get worker by ID
   const getWorkerById = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/workers/${id}`);
+      const response = await fetch(`/api/workers/${id}`);
       const data = await response.json();
       
       if (data.success) {
@@ -157,7 +157,7 @@ export const WorkerProvider = ({ children }) => {
   // Search workers
   const searchWorkers = async (query) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/workers/search?query=${query}`);
+      const response = await fetch(`/api/workers/search?query=${query}`);
       const data = await response.json();
       
       if (data.success) {
