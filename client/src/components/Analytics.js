@@ -11,8 +11,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   AreaChart,
   Area
 } from 'recharts';
@@ -31,7 +29,6 @@ import {
 
 const Analytics = () => {
   const { workers, getUniqueRoles, getWorkersByRole, getAverageSalary } = React.useContext(WorkerContext);
-  const [analytics, setAnalytics] = useState(null);
   const [topPerformers, setTopPerformers] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,10 +43,9 @@ const Analytics = () => {
         fetch('/api/analytics/dashboard'),
         fetch('/api/analytics/top-performers')
       ]);
-      const analyticsData = await analyticsRes.json();
+      await analyticsRes.json();
       const performersData = await performersRes.json();
       
-      setAnalytics(analyticsData.data);
       setTopPerformers(performersData.data);
     } catch (error) {
       console.error('Failed to fetch analytics:', error);

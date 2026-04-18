@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { WorkerContext } from '../context/WorkerContext';
 import { formatIndianRupees } from '../utils/currencyUtils';
 import {
@@ -9,11 +9,9 @@ import {
   Edit,
   Trash2,
   Plus,
-  User,
   DollarSign,
   Clock,
   Phone,
-  Star,
   Eye,
   Briefcase,
   Activity
@@ -36,54 +34,45 @@ const WorkerList = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
-    applyFilters();
+    const applyFiltersLocal = () => {
+      let result = [...workers];
+
+      // Search filter
+      if (searchQuery.trim() !== '') {
+        result = result.filter(worker =>
+          worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          worker.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          worker.phone.includes(searchQuery)
+        );
+      }
+
+      // Role filter
+      if (selectedRole !== 'All') {
+        result = result.filter(worker => worker.role === selectedRole);
+      }
+
+      // Sorting
+      result.sort((a, b) => {
+        let aVal = a[sortBy];
+        let bVal = b[sortBy];
+
+        if (typeof aVal === 'string') {
+          aVal = aVal.toLowerCase();
+          bVal = bVal.toLowerCase();
+        }
+
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+
+      setFilteredWorkers(result);
+    };
+
+    applyFiltersLocal();
   }, [workers, searchQuery, selectedRole, sortBy, sortOrder]);
-
-  const applyFilters = () => {
-    let result = [...workers];
-
-    // Search filter
-    if (searchQuery.trim() !== '') {
-      result = result.filter(worker =>
-        worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        worker.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        worker.phone.includes(searchQuery)
-      );
-    }
-
-    // Role filter
-    if (selectedRole !== 'All') {
-      result = result.filter(worker => worker.role === selectedRole);
-    }
-
-    // Sorting
-    result.sort((a, b) => {
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
-
-      if (typeof aVal === 'string') {
-        aVal = aVal.toLowerCase();
-        bVal = bVal.toLowerCase();
-      }
-
-      if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
-
-    setFilteredWorkers(result);
-  };
-
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
 
   const handleDelete = async (id) => {
     const result = await deleteWorker(id);

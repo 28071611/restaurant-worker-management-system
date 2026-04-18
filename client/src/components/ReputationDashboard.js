@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { WorkerContext } from '../context/WorkerContext';
-import { formatIndianRupees, formatBonus } from '../utils/currencyUtils';
-import StarRating from './StarRating';
+import { formatBonus } from '../utils/currencyUtils';
 import { 
   Trophy, 
   Star, 
@@ -10,11 +8,6 @@ import {
   Users, 
   Award,
   Calendar,
-  Target,
-  AlertCircle,
-  Activity,
-  Shield,
-  ArrowRight,
   ChevronRight,
   Medal,
   Crown
@@ -22,18 +15,13 @@ import {
 
 const ReputationDashboard = () => {
   const navigate = useNavigate();
-  const { workers } = React.useContext(WorkerContext);
   const [reputationData, setReputationData] = useState([]);
   const [employeeOfMonth, setEmployeeOfMonth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedMonth, selectedYear]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [rankingRes, employeeRes] = await Promise.all([
@@ -52,7 +40,11 @@ const ReputationDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleSelectEmployeeOfMonth = async () => {
     try {

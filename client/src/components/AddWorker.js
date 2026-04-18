@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { WorkerContext } from '../context/WorkerContext';
 import { formatIndianRupees } from '../utils/currencyUtils';
 import ImageUpload from './ImageUpload';
 import {
@@ -20,7 +19,6 @@ import {
 
 const AddWorker = () => {
   const navigate = useNavigate();
-  const { addWorker } = React.useContext(WorkerContext);
   const [formData, setFormData] = useState({
     name: '',
     role: 'Chef',

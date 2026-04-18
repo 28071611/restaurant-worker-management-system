@@ -7,8 +7,7 @@ import {
   AlertTriangle, 
   ArrowLeft, 
   Send,
-  User,
-  Calendar
+  User
 } from 'lucide-react';
 
 const ComplaintForm = () => {

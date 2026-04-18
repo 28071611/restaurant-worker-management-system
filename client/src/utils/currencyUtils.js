@@ -146,7 +146,6 @@ export const formatIndianRupeesInWords = (amount) => {
   if (amount === 0) return 'Zero Rupees';
   
   // This is a simplified version - you can expand it for full conversion
-  const units = ['', 'Thousand', 'Lakh', 'Crore'];
   let words = '';
   
   if (amount >= 10000000) {

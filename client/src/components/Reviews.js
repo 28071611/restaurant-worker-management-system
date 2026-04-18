@@ -6,7 +6,6 @@ import {
     MessageSquare,
     Send,
     User,
-    Filter,
     AlertCircle,
     ThumbsUp
 } from 'lucide-react';

@@ -2,27 +2,23 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import {
-    User,
     Mail,
     Phone,
     Award,
     Calendar,
     Banknote,
     Clock,
-    Briefcase,
     TrendingUp,
     Star,
     Activity,
     Shield,
-    ArrowRight,
-    Trophy,
     Target,
     Zap,
     AlertCircle
 } from 'lucide-react';
 
 const WorkerPortal = () => {
-    const { user } = useAuth();
+    useAuth();
     const [workerData, setWorkerData] = useState(null);
     const [loading, setLoading] = useState(true);
 

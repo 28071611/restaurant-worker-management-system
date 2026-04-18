@@ -7,9 +7,6 @@ import { formatIndianRupees } from '../utils/currencyUtils';
 import {
   Users,
   Star,
-  TrendingUp,
-  DollarSign,
-  Calendar,
   Trophy,
   Settings,
   LogOut,
@@ -40,8 +37,49 @@ const AdminDashboard = () => {
   const [recentReviews, setRecentReviews] = useState([]);
 
   useEffect(() => {
-    fetchDashboardStats();
-    fetchRecentReviews();
+    const fetchRecentReviewsLocal = async () => {
+      try {
+        const response = await axios.get('/api/reviews');
+        if (response.data.success) {
+          setRecentReviews(response.data.data.slice(0, 5)); // Show 5 most recent
+        }
+      } catch (error) {
+        setRecentReviews([]);
+      }
+    };
+
+    const fetchDashboardStatsLocal = async () => {
+      try {
+        setLoading(true);
+
+        const [ratingsData, employeeOfMonth] = await Promise.all([
+          fetch('/api/reputation/ranking').then(res => res.json()),
+          fetch('/api/analytics/dashboard').then(res => res.json()),
+          fetch('/api/reputation/employee-of-month').then(res => res.json())
+        ]);
+
+        const ratings = ratingsData.success ? ratingsData.data : [];
+        const totalRatings = ratings.reduce((sum, worker) => sum + worker.totalRatings, 0);
+        const avgRating = ratings.length > 0
+          ? ratings.reduce((sum, worker) => sum + worker.avgRating, 0) / ratings.length
+          : 0;
+
+        setStats({
+          totalWorkers: workers.length,
+          totalRatings,
+          avgRating: avgRating.toFixed(1),
+          totalComplaints: ratings.reduce((sum, worker) => sum + worker.totalComplaints, 0),
+          employeeOfMonth: employeeOfMonth.success ? employeeOfMonth.data : null
+        });
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardStatsLocal();
+    fetchRecentReviewsLocal();
 
     const handleKeyPress = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
@@ -52,48 +90,7 @@ const AdminDashboard = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [navigate]);
-
-  const fetchRecentReviews = async () => {
-    try {
-      const response = await axios.get('/api/reviews');
-      if (response.data.success) {
-        setRecentReviews(response.data.data.slice(0, 5)); // Show 5 most recent
-      }
-    } catch (error) {
-      setRecentReviews([]);
-    }
-  };
-
-  const fetchDashboardStats = async () => {
-    try {
-      setLoading(true);
-
-      const [ratingsData, complaintsData, employeeOfMonth] = await Promise.all([
-        fetch('/api/reputation/ranking').then(res => res.json()),
-        fetch('/api/analytics/dashboard').then(res => res.json()),
-        fetch('/api/reputation/employee-of-month').then(res => res.json())
-      ]);
-
-      const ratings = ratingsData.success ? ratingsData.data : [];
-      const totalRatings = ratings.reduce((sum, worker) => sum + worker.totalRatings, 0);
-      const avgRating = ratings.length > 0
-        ? ratings.reduce((sum, worker) => sum + worker.avgRating, 0) / ratings.length
-        : 0;
-
-      setStats({
-        totalWorkers: workers.length,
-        totalRatings,
-        avgRating: avgRating.toFixed(1),
-        totalComplaints: ratings.reduce((sum, worker) => sum + worker.totalComplaints, 0),
-        employeeOfMonth: employeeOfMonth.success ? employeeOfMonth.data : null
-      });
-    } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [navigate, workers.length]);
 
   if (loading) {
     return (

@@ -6,7 +6,6 @@ import { formatIndianRupees } from '../utils/currencyUtils';
 import {
   User,
   Star,
-  Calendar,
   DollarSign,
   TrendingUp,
   Clock,
@@ -15,7 +14,6 @@ import {
   MessageSquare,
   AlertCircle,
   ArrowLeft,
-  ChevronRight,
   Shield,
   Activity,
   Edit
@@ -32,29 +30,29 @@ const WorkerProfile = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchWorkerData();
+    const fetchWorkerDataLocal = async () => {
+      try {
+        setLoading(true);
+
+        const [workerRes, ratingsRes, reputationRes] = await Promise.all([
+          fetch(`/api/workers/${id}`).then(res => res.json()),
+          fetch(`/api/reputation/ratings/${id}`).then(res => res.json()),
+          fetch(`/api/reputation/reputation/${id}`).then(res => res.json())
+        ]);
+
+        if (workerRes.success) setWorker(workerRes.data);
+        if (ratingsRes.success) setRatings(ratingsRes.data.ratings);
+        if (reputationRes.success) setReputation(reputationRes.data);
+
+      } catch (error) {
+        setError('Intelligence Retrieval Failed');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkerDataLocal();
   }, [id]);
-
-  const fetchWorkerData = async () => {
-    try {
-      setLoading(true);
-
-      const [workerRes, ratingsRes, reputationRes] = await Promise.all([
-        fetch(`/api/workers/${id}`).then(res => res.json()),
-        fetch(`/api/reputation/ratings/${id}`).then(res => res.json()),
-        fetch(`/api/reputation/reputation/${id}`).then(res => res.json())
-      ]);
-
-      if (workerRes.success) setWorker(workerRes.data);
-      if (ratingsRes.success) setRatings(ratingsRes.data.ratings);
-      if (reputationRes.success) setReputation(reputationRes.data);
-
-    } catch (error) {
-      setError('Intelligence Retrieval Failed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (

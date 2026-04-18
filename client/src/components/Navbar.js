@@ -6,9 +6,7 @@ import {
   Users,
   Plus,
   BarChart3,
-  Home,
   Star,
-  Award,
   LogOut,
   User,
   LayoutDashboard,
@@ -16,9 +14,7 @@ import {
   ClipboardList,
   Trophy,
   Menu,
-  X,
-  Shield,
-  Activity
+  X
 } from 'lucide-react';
 
 const Navbar = () => {
