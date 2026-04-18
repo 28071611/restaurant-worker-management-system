@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User, UserFactory } = require('../models/User');
+const { Worker } = require('../models/Worker');
 
 // Singleton Pattern - JWT Token Manager
 class TokenManager {
@@ -96,46 +97,81 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email, isActive: true });
-    if (!user) {
+    // Try to find user in User collection
+    let user = await User.findOne({ email, isActive: true });
+    if (user) {
+      // Check password
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid credentials'
+        });
+      }
+      // Update login info
+      await user.updateLoginInfo();
+      // Generate token
+      const token = tokenManager.generateToken({
+        id: user._id,
+        email: user.email,
+        role: user.role
+      });
+      return res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone,
+            lastLogin: user.lastLogin,
+            loginCount: user.loginCount
+          },
+          token
+        }
+      });
+    }
+
+    // If not found in User, try Worker collection
+    const worker = await Worker.findOne({ email });
+    if (!worker) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
+    // Check password (if set)
+    if (!worker.password) {
+      return res.status(401).json({
+        success: false,
+        message: 'Worker account does not have a password set.'
+      });
+    }
+    const isWorkerMatch = await worker.comparePassword(password);
+    if (!isWorkerMatch) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-
-    // Update login info
-    await user.updateLoginInfo();
-
-    // Generate token
+    // Generate token for worker
     const token = tokenManager.generateToken({
-      id: user._id,
-      email: user.email,
-      role: user.role
+      id: worker._id,
+      email: worker.email,
+      role: 'worker'
     });
-
-    res.json({
+    return res.json({
       success: true,
       message: 'Login successful',
       data: {
         user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          lastLogin: user.lastLogin,
-          loginCount: user.loginCount
+          id: worker._id,
+          name: worker.name,
+          email: worker.email,
+          role: 'worker',
+          phone: worker.phone
         },
         token
       }

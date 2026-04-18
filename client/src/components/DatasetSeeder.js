@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Database, 
   Download, 
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 
 const DatasetSeeder = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
@@ -165,6 +163,7 @@ const DatasetSeeder = () => {
   };
 
   const getDepartmentStats = () => {
+    // Generate department stats from the dataset
     const stats = {};
     workersDataset.forEach(worker => {
       stats[worker.department] = (stats[worker.department] || 0) + 1;

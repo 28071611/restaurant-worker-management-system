@@ -51,6 +51,8 @@ const Login = () => {
       const userRole = JSON.parse(atob(localStorage.getItem('token').split('.')[1])).role;
       if (userRole === 'admin') {
         navigate('/admin/dashboard');
+      } else if (userRole === 'worker') {
+        navigate('/worker/portal');
       } else {
         navigate('/customer/dashboard');
       }
